@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="rosbag" type="play" name="player" output="screen" args="/home/bang/liosam_ws/src/LIO-SAM/dataset/2011_09_30_drive_0028.bag"/>
+    <!--<node type="rviz" name="rviz" pkg="rviz" args="-d $(find det3d)/det3d.rviz"/>-->
+</launch>

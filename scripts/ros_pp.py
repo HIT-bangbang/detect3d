@@ -31,9 +31,9 @@ class ros_cls:
         self.model = init_model(config_path, checkpoint, device)
         print('[+]-------->Model has been inited!')
 
-        self.subLidar = rospy.Subscriber("/points_raw", PointCloud2, self.lidar_callback, queue_size=1, buff_size=2 ** 12)
-        self.pubbbox = rospy.Publisher("/detect3d/bbox", BoundingBoxArray, queue_size=1)
-        self.pubbboxwithbbox = rospy.Publisher("/detect3d/PointWithbbox", PointWithBBox, queue_size=1)
+        self.subLidar = rospy.Subscriber("/points_raw", PointCloud2, self.lidar_callback,tcp_nodelay=True)
+        # self.pubbbox = rospy.Publisher("/detect3d/bbox", BoundingBoxArray, queue_size=1)
+        self.pubbboxwithbbox = rospy.Publisher("/detect3d/PointWithbbox",PointWithBBox, queue_size=10)
 
         print('[+]-------->ROS is starting!')
 
@@ -75,15 +75,12 @@ class ros_cls:
         # 创建一个BoundingBoxArray
         bboxarr = BoundingBoxArray()
         # BoundingBoxArray的参考坐标系就是激光雷达坐标系
-        bboxarr.header.frame_id = PointCloudsmsg.header.frame_id
-        bboxarr.header.stamp = PointCloudsmsg.header.stamp
-
+        bboxarr.header = PointCloudsmsg.header
         # 将result中所有的BoundingBox塞到BoundingBoxArray里面
         for i in range(boxes_lidar.shape[0]):
             # 创建一个BoundingBox
             bbox = BoundingBox()
-            bbox.header.frame_id = PointCloudsmsg.header.frame_id
-            bbox.header.stamp = PointCloudsmsg.header.stamp
+            bbox.header = PointCloudsmsg.header
             bbox.pose.position.x = float(boxes_lidar[i][0])
             bbox.pose.position.y = float(boxes_lidar[i][1])
             bbox.pose.position.z = float(boxes_lidar[i][2])+float(boxes_lidar[i][5])/2
@@ -99,9 +96,10 @@ class ros_cls:
             bbox.label = label[i]
             bboxarr.boxes.append(bbox)
         # 发布检测框
-        self.pubbbox.publish(bboxarr)
+        # self.pubbbox.publish(bboxarr)
         # 发布点云和检测框二合一消息
         pointswithbbbox = PointWithBBox()
+        pointswithbbbox.header = PointCloudsmsg.header
         pointswithbbbox.CloudMsg = PointCloudsmsg
         pointswithbbbox.BBboxArray = bboxarr
         self.pubbboxwithbbox.publish(pointswithbbbox)

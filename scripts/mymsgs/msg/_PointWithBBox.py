@@ -12,11 +12,28 @@ import sensor_msgs.msg
 import std_msgs.msg
 
 class PointWithBBox(genpy.Message):
-  _md5sum = "91c0962bb1b994b6f3a947526175cb7d"
+  _md5sum = "d4f3bcd55598496c72a14c89c275cb98"
   _type = "mymsgs/PointWithBBox"
-  _has_header = False  # flag to mark the presence of a Header object
-  _full_text = """sensor_msgs/PointCloud2 CloudMsg
+  _has_header = True  # flag to mark the presence of a Header object
+  _full_text = """Header header
+sensor_msgs/PointCloud2 CloudMsg
 jsk_recognition_msgs/BoundingBoxArray BBboxArray
+
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+string frame_id
 
 ================================================================================
 MSG: sensor_msgs/PointCloud2
@@ -47,22 +64,6 @@ uint32  row_step     # Length of a row in bytes
 uint8[] data         # Actual point data, size is (row_step*height)
 
 bool is_dense        # True if there are no invalid points
-
-================================================================================
-MSG: std_msgs/Header
-# Standard metadata for higher-level stamped data types.
-# This is generally used to communicate timestamped data 
-# in a particular coordinate frame.
-# 
-# sequence ID: consecutively increasing ID 
-uint32 seq
-#Two-integer timestamp that is expressed as:
-# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
-# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
-# time-handling sugar is provided by the client library
-time stamp
-#Frame this data is associated with
-string frame_id
 
 ================================================================================
 MSG: sensor_msgs/PointField
@@ -133,8 +134,8 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z"""
-  __slots__ = ['CloudMsg','BBboxArray']
-  _slot_types = ['sensor_msgs/PointCloud2','jsk_recognition_msgs/BoundingBoxArray']
+  __slots__ = ['header','CloudMsg','BBboxArray']
+  _slot_types = ['std_msgs/Header','sensor_msgs/PointCloud2','jsk_recognition_msgs/BoundingBoxArray']
 
   def __init__(self, *args, **kwds):
     """
@@ -144,7 +145,7 @@ float64 z"""
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       CloudMsg,BBboxArray
+       header,CloudMsg,BBboxArray
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -153,11 +154,14 @@ float64 z"""
     if args or kwds:
       super(PointWithBBox, self).__init__(*args, **kwds)
       # message fields cannot be None, assign default values for those that are
+      if self.header is None:
+        self.header = std_msgs.msg.Header()
       if self.CloudMsg is None:
         self.CloudMsg = sensor_msgs.msg.PointCloud2()
       if self.BBboxArray is None:
         self.BBboxArray = jsk_recognition_msgs.msg.BoundingBoxArray()
     else:
+      self.header = std_msgs.msg.Header()
       self.CloudMsg = sensor_msgs.msg.PointCloud2()
       self.BBboxArray = jsk_recognition_msgs.msg.BoundingBoxArray()
 
@@ -173,6 +177,14 @@ float64 z"""
     :param buff: buffer, ``StringIO``
     """
     try:
+      _x = self
+      buff.write(_get_struct_3I().pack(_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs))
+      _x = self.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
       buff.write(_get_struct_3I().pack(_x.CloudMsg.header.seq, _x.CloudMsg.header.stamp.secs, _x.CloudMsg.header.stamp.nsecs))
       _x = self.CloudMsg.header.frame_id
@@ -249,11 +261,26 @@ float64 z"""
     if python3:
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
+      if self.header is None:
+        self.header = std_msgs.msg.Header()
       if self.CloudMsg is None:
         self.CloudMsg = sensor_msgs.msg.PointCloud2()
       if self.BBboxArray is None:
         self.BBboxArray = jsk_recognition_msgs.msg.BoundingBoxArray()
       end = 0
+      _x = self
+      start = end
+      end += 12
+      (_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.header.frame_id = str[start:end]
       _x = self
       start = end
       end += 12
@@ -374,6 +401,14 @@ float64 z"""
     """
     try:
       _x = self
+      buff.write(_get_struct_3I().pack(_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs))
+      _x = self.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
+      _x = self
       buff.write(_get_struct_3I().pack(_x.CloudMsg.header.seq, _x.CloudMsg.header.stamp.secs, _x.CloudMsg.header.stamp.nsecs))
       _x = self.CloudMsg.header.frame_id
       length = len(_x)
@@ -450,11 +485,26 @@ float64 z"""
     if python3:
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
+      if self.header is None:
+        self.header = std_msgs.msg.Header()
       if self.CloudMsg is None:
         self.CloudMsg = sensor_msgs.msg.PointCloud2()
       if self.BBboxArray is None:
         self.BBboxArray = jsk_recognition_msgs.msg.BoundingBoxArray()
       end = 0
+      _x = self
+      start = end
+      end += 12
+      (_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.header.frame_id = str[start:end]
       _x = self
       start = end
       end += 12

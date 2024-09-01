@@ -20,7 +20,8 @@ import sys
 sys.path.append("/home/bang/mmdetection3d")
 
 from mmdet3d.apis import (inference_detector, init_model)
-from mmdet3d.structures.points import get_points_type
+import ros_numpy
+
 
 
 class ros_cls:
@@ -40,14 +41,29 @@ class ros_cls:
 
     def lidar_callback(self, PointCloudsmsg):
         callback_start =  time.time()
-        points = np.array(list(pc2.read_points(PointCloudsmsg, field_names=("x", "y", "z", "intensity"), skip_nans=True)))
-        points = points.astype('float32')
-        
+
+        # method 1 : 直接使用 read_points_list 慢的吓人
+        # points_array = np.array(pc2.read_points_list(PointCloudsmsg, field_names=("x", "y", "z", "intensity"), skip_nans=True)) 
+        # points_array = points_array.astype('float32')
+
+        # method 2 : 也不知道为啥，反正在分两步转换成list再转换成array就会快很多
+        # points_array = np.array(list(pc2.read_points(PointCloudsmsg, field_names=("x", "y", "z", "intensity"), skip_nans=True))) 
+        # points_array = points_array.astype('float32')
+
+        # method 3 : 这样是最快的，贼tm快，比 pc2.read_points 耗时小一两个数量级
+        pc = ros_numpy.numpify(PointCloudsmsg)
+        points=np.zeros((pc.shape[0],4))
+        points[:,0]=pc['x']
+        points[:,1]=pc['y']
+        points[:,2]=pc['z']
+        points[:,3]=pc['intensity']
+        points_array = np.array(points, dtype=np.float32)
+
         inference_start = time.time()
         
         # 开始推理，结果保存在result中
         torch.cuda.synchronize()
-        result, data = inference_detector(self.model, points)
+        result, data = inference_detector(self.model, points_array)
         torch.cuda.synchronize()
 
         inference_end = time.time()
@@ -108,11 +124,11 @@ class ros_cls:
 
 if __name__ == '__main__':
 
-    PATH = '/home/bang/mmdetection3d/'
+    PATH = '/home/bang/mmdection_files/'
 
     # pointpillars
-    config_path = PATH + 'configs/pointpillars/pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py'
-    checkpoints = PATH + 'checkpoints/hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth'
+    config_path = PATH + 'pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py'
+    checkpoints = PATH + 'hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth'
     
     # # point_rcnn 0.3
     # config_path = PATH + 'configs/point_rcnn/point-rcnn_8xb2_kitti-3d-3class.py'
